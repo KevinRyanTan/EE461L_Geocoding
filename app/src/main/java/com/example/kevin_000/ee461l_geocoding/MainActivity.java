@@ -1,25 +1,34 @@
 package com.example.kevin_000.ee461l_geocoding;
 
 import android.app.ProgressDialog;
-import android.location.LocationListener;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity   {
-
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+    GoogleMap mGoogleMap;
+    GoogleApiClient mGoogleApiClient;
 
     Button btnShowCoord;
     EditText edtAddress;
     TextView txtCoord;
+
+    String latitude;
+    String longitude;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +47,10 @@ public class MainActivity extends AppCompatActivity   {
                 new GetCoordiantes().execute(edtAddress.getText().toString().replace(" ", "+"));
             }
         });
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     private class GetCoordiantes extends AsyncTask<String,Void,String> {
@@ -80,6 +93,8 @@ public class MainActivity extends AppCompatActivity   {
 
                 String lng = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
                         .getJSONObject("geometry").getJSONObject("location").get("lng").toString();
+                latitude = lat;
+                longitude = lng;
 
                 txtCoord.setText(String.format("Coordinates: %s, %s", lat, lng));
 
@@ -94,5 +109,10 @@ public class MainActivity extends AppCompatActivity   {
             }
         }
 
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mGoogleMap = map;
     }
 }

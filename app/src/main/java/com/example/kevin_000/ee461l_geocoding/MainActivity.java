@@ -4,6 +4,9 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -60,6 +63,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id = item.getItemId();
+
+        switch(id){
+            case R.id.mapTypeHybrid:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+            case R.id.mapTypeSatellite:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+            case R.id.mapTypeNormal:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+            case R.id.mapTypeTerrain:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+            case R.id.mapTypeNone:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NONE);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+
     }
 
     @Override

@@ -10,15 +10,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, OnMarkerClickListener {
     GoogleMap mGoogleMap;
     GoogleApiClient mGoogleApiClient;
 
@@ -45,12 +52,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view)
             {
                 new GetCoordiantes().execute(edtAddress.getText().toString().replace(" ", "+"));
+
+
             }
         });
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
     }
 
     private class GetCoordiantes extends AsyncTask<String,Void,String> {
@@ -93,9 +107,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 String lng = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
                         .getJSONObject("geometry").getJSONObject("location").get("lng").toString();
-                latitude = lat;
-                longitude = lng;
-
+                //latitude = lat;
+                //longitude = lng;
+                mGoogleMap.clear();
+                LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+                Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                        .position(latLng));
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng,2);
+                mGoogleMap.moveCamera(cameraUpdate);
                 txtCoord.setText(String.format("Coordinates: %s, %s", lat, lng));
 
                 if(dialog.isShowing())

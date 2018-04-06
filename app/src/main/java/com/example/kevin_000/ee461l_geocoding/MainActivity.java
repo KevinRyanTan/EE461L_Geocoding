@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,14 +28,10 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, OnMarkerClickListener {
     GoogleMap mGoogleMap;
-    GoogleApiClient mGoogleApiClient;
-
     Button btnShowCoord;
     EditText edtAddress;
     TextView txtCoord;
 
-    String latitude;
-    String longitude;
 
 
     @Override
@@ -51,6 +48,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view)
             {
+                InputMethodManager imm =
+                        (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(),0);
                 new GetCoordiantes().execute(edtAddress.getText().toString().replace(" ", "+"));
 
 
@@ -107,13 +107,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 String lng = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
                         .getJSONObject("geometry").getJSONObject("location").get("lng").toString();
-                //latitude = lat;
-                //longitude = lng;
+
+                String formattedAddress = ((JSONArray)jsonObject.get("results")).getJSONObject(0).get("formatted_address").toString();
+
+
                 mGoogleMap.clear();
                 LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
                 Marker marker = mGoogleMap.addMarker(new MarkerOptions()
-                        .position(latLng));
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng,2);
+                        .position(latLng).title(formattedAddress));
+                marker.showInfoWindow();
+
+                int zoomAmount = 0;
+                String zoom = ((JSONArray)jsonObject.get("results")).getJSONObject(0).getJSONArray("address_components")
+                        .getJSONObject(0).getJSONArray("types").get(0).toString();
+                if(zoom.equals("street_number")) zoomAmount = 15;
+                else if(zoom.equals("route")) zoomAmount = 13;
+                else if(zoom.equals("locality")) zoomAmount = 10;
+                else if(zoom.equals("administrative_area_level_2")) zoomAmount = 7;
+                else if(zoom.equals("administrative_area_level_1")) zoomAmount = 6;
+                else if(zoom.equals("country")) zoomAmount = 3;
+                else if(zoom.equals("postal_code")) zoomAmount = 8;
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomAmount);
                 mGoogleMap.moveCamera(cameraUpdate);
                 txtCoord.setText(String.format("Coordinates: %s, %s", lat, lng));
 
